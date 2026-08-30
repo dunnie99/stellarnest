@@ -131,6 +131,14 @@ Pays out from a pool's balance.
 Balances are per-pool, so one pool cannot be drained to pay another even though the treasury
 holds a single combined token balance.
 
+## Storage durability
+
+Soroban persistent storage expires unless its time-to-live (TTL) is renewed. Pool records,
+member lists, per-member balances, and treasury pool balances are all renewed on the writes
+that create or update them. Instance state (including the running treasury total) is renewed
+alongside each balance-changing operation. The contracts renew entries with fewer than 30 days
+remaining to a 90-day lifetime, so active pools keep both custody and member claims alive.
+
 ### Read-only
 
 `balance(pool_id) -> i128` · `total_held() -> i128` · `savings_contract() -> Address` ·
