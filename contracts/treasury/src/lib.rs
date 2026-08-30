@@ -86,6 +86,11 @@ impl Treasury {
             TTL_THRESHOLD,
             TTL_EXTEND_TO,
         );
+        env.storage().persistent().extend_ttl(
+            &DataKey::PoolBalance(pool_id),
+            TTL_THRESHOLD,
+            TTL_EXTEND_TO,
+        );
 
         let total: i128 = env
             .storage()
@@ -136,6 +141,9 @@ impl Treasury {
         env.storage()
             .instance()
             .set(&DataKey::TotalHeld, &(total - amount));
+        env.storage()
+            .instance()
+            .extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
 
         // The treasury authorises itself as the sender here.
         Self::token_client(&env)?.transfer(&env.current_contract_address(), &to, &amount);
