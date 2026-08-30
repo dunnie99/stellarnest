@@ -25,6 +25,12 @@ export default defineConfig({
               test: /node_modules[\\/]@stellar[\\/]stellar-sdk[\\/]/,
               priority: 25,
             },
+            {
+              name: 'shared-app',
+              minShareCount: 2,
+              minSize: 10_000,
+              priority: 10,
+            },
           ],
         },
       },
