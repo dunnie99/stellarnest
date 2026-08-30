@@ -1,0 +1,19 @@
+target/
+node_modules
+dist
+coverage
+.DS_Store
+
+# Local environment and deploy output. `.env.test` and `.env.production` are
+# committed deliberately — they contain no secrets and CI needs them.
+.env
+.env.local
+scripts/deploy/logs/
+contracts/test_snapshots/
+
+# Generated frontend and Rust build artifacts.
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+contracts/target/
+.DS_Store
