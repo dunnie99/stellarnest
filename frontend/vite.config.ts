@@ -15,6 +15,11 @@ export default defineConfig({
               test: /node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
               priority: 30,
             },
+            {
+              name: 'wallet-kit',
+              test: /node_modules[\\/]@creit\.tech[\\/]stellar-wallets-kit[\\/]/,
+              priority: 25,
+            },
           ],
         },
       },
