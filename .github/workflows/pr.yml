@@ -17,6 +17,15 @@ env:
   WASM_TARGET: wasm32v1-none
 
 jobs:
+  requirements:
+    name: Delivery requirements
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify delivery checklist evidence
+        run: ./scripts/check-requirements.sh
+
   contracts:
     name: Smart contracts
     runs-on: ubuntu-latest
