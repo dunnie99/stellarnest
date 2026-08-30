@@ -107,6 +107,7 @@ impl SavingsPool {
             .instance()
             .extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
         Self::extend_pool_ttl(&env, pool_id);
+        Self::extend_member_balance_ttl(&env, pool_id, &creator);
 
         PoolCreated {
             pool_id,
@@ -150,6 +151,7 @@ impl SavingsPool {
             .persistent()
             .set(&DataKey::MemberBalance(pool_id, member.clone()), &0i128);
         Self::extend_pool_ttl(&env, pool_id);
+        Self::extend_member_balance_ttl(&env, pool_id, &member);
 
         MemberJoined {
             pool_id,
@@ -201,6 +203,7 @@ impl SavingsPool {
             .persistent()
             .set(&DataKey::Pool(pool_id), &pool);
         Self::extend_pool_ttl(&env, pool_id);
+        Self::extend_member_balance_ttl(&env, pool_id, &member);
 
         ContributionMade {
             pool_id,
@@ -247,6 +250,7 @@ impl SavingsPool {
             .persistent()
             .set(&DataKey::Pool(pool_id), &pool);
         Self::extend_pool_ttl(&env, pool_id);
+        Self::extend_member_balance_ttl(&env, pool_id, &member);
 
         WithdrawalProcessed {
             pool_id,
@@ -359,5 +363,16 @@ impl SavingsPool {
         let persistent = env.storage().persistent();
         persistent.extend_ttl(&DataKey::Pool(pool_id), TTL_THRESHOLD, TTL_EXTEND_TO);
         persistent.extend_ttl(&DataKey::Members(pool_id), TTL_THRESHOLD, TTL_EXTEND_TO);
+    }
+
+    /// Keep a member's claim alive whenever the pool is created or their
+    /// balance changes. Otherwise a long-lived active pool could retain its
+    /// member list while an individual balance expires independently.
+    fn extend_member_balance_ttl(env: &Env, pool_id: u32, member: &Address) {
+        env.storage().persistent().extend_ttl(
+            &DataKey::MemberBalance(pool_id, member.clone()),
+            TTL_THRESHOLD,
+            TTL_EXTEND_TO,
+        );
     }
 }
