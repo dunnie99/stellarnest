@@ -20,6 +20,11 @@ export default defineConfig({
               test: /node_modules[\\/]@creit\.tech[\\/]stellar-wallets-kit[\\/]/,
               priority: 25,
             },
+            {
+              name: 'stellar-sdk',
+              test: /node_modules[\\/]@stellar[\\/]stellar-sdk[\\/]/,
+              priority: 25,
+            },
           ],
         },
       },
