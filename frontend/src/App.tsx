@@ -2,11 +2,11 @@ import { lazy, Suspense } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
 import RouteFallback from './components/RouteFallback';
 import WalletBar from './components/WalletBar';
-import PoolDetails from './pages/PoolDetails';
 import Activity from './pages/Activity';
 import { useWallet } from './hooks/useWallet';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const PoolDetails = lazy(() => import('./pages/PoolDetails'));
 
 const NAV = [
   { to: '/', label: 'Dashboard', end: true },
@@ -68,7 +68,14 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route path="/pools/:poolId" element={<PoolDetails />} />
+          <Route
+            path="/pools/:poolId"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <PoolDetails />
+              </Suspense>
+            }
+          />
           <Route path="/activity" element={<Activity />} />
         </Routes>
       </main>
