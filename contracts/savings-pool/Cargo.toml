@@ -1,0 +1,21 @@
+[package]
+name = "stellarnest-savings-pool"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+# Treasury is a *dev*-dependency only. The savings contract calls it through a
+# `#[contractclient]` trait at runtime, so the release Wasm carries no link to
+# it — which is what prevents the treasury's `#[contractimpl]` exports from
+# being pulled into this contract's Wasm. Tests need the real implementation to
+# register, hence the dev-dependency.
+stellarnest-treasury = { path = "../treasury" }

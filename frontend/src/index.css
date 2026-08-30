@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-950: #07090f;
+  --color-ink-900: #0b0f18;
+  --color-ink-850: #101623;
+  --color-ink-800: #151d2d;
+  --color-ink-700: #1e2839;
+  --color-ink-600: #2b3849;
+  --color-mist-400: #7d8ba3;
+  --color-mist-300: #9aa7bd;
+  --color-mist-200: #c3ccdb;
+  --color-beam-500: #4f8cff;
+  --color-beam-400: #6ea3ff;
+  --color-beam-300: #9dc0ff;
+  --color-jade-400: #34d399;
+  --color-ember-400: #f87171;
+  --color-amber-glow: #fbbf24;
+
+  --font-mono:
+    'SF Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-ink-950);
+  color: var(--color-mist-200);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Long hashes and addresses must wrap rather than force the page to scroll. */
+.break-hash {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@keyframes pulse-fade {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+.animate-pulse-fade {
+  animation: pulse-fade 1.4s ease-in-out infinite;
+}

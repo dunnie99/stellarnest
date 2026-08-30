@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+coverage
+.DS_Store
+node_modules/.tmp
+
+# Local secrets and deploy output. `.env.test` and `.env.production` are
+# committed on purpose — they hold no secrets and CI needs them.
+.env
+.env.local

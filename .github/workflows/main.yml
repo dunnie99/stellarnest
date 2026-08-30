@@ -1,0 +1,171 @@
+name: Main
+
+# On main: build, test, then deploy the contracts to Testnet and build the
+# frontend against the freshly deployed addresses.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: main
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  WASM_TARGET: wasm32v1-none
+
+jobs:
+  verify:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32v1-none
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts
+
+      - name: Contract checks
+        working-directory: contracts
+        run: |
+          cargo fmt --all --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Frontend checks
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run test:coverage
+
+  deploy:
+    name: Deploy to Testnet
+    needs: verify
+    runs-on: ubuntu-latest
+    # The deploy needs a funded key. Without the secret the job is skipped
+    # rather than failing, so a fork or a fresh clone still gets a green run.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    environment: testnet
+    outputs:
+      savings_id: ${{ steps.deploy.outputs.savings_id }}
+      treasury_id: ${{ steps.deploy.outputs.treasury_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for deployer secret
+        id: guard
+        env:
+          # Read through the environment rather than interpolating the secret
+          # into the script body.
+          DEPLOYER_SECRET: ${{ secrets.STELLAR_DEPLOYER_SECRET }}
+        run: |
+          if [[ -z "$DEPLOYER_SECRET" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::STELLAR_DEPLOYER_SECRET is not set; skipping deployment."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.guard.outputs.configured == 'true'
+        with:
+          targets: wasm32v1-none
+
+      - uses: Swatinem/rust-cache@v2
+        if: steps.guard.outputs.configured == 'true'
+        with:
+          workspaces: contracts
+
+      - name: Install Stellar CLI
+        if: steps.guard.outputs.configured == 'true'
+        run: cargo install --locked stellar-cli
+
+      - name: Build and deploy
+        id: deploy
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          # The CLI accepts a raw S… secret key wherever an identity name is
+          # expected, so no `stellar keys add` step (and no OS credential store,
+          # which CI runners lack) is needed.
+          IDENTITY: ${{ secrets.STELLAR_DEPLOYER_SECRET }}
+          NETWORK: testnet
+        run: |
+          ./scripts/deploy/build.sh --skip-tests
+          ./scripts/deploy/deploy.sh
+          # deploy.sh writes both IDs into frontend/.env; surface them as outputs.
+          {
+            echo "savings_id=$(grep '^VITE_SAVINGS_CONTRACT_ID=' frontend/.env | cut -d= -f2-)"
+            echo "treasury_id=$(grep '^VITE_TREASURY_CONTRACT_ID=' frontend/.env | cut -d= -f2-)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify deployment
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          IDENTITY: ${{ secrets.STELLAR_DEPLOYER_SECRET }}
+          NETWORK: testnet
+        run: ./scripts/deploy/verify.sh
+
+      - name: Publish contract addresses
+        if: steps.guard.outputs.configured == 'true'
+        run: |
+          {
+            echo "### StellarNest deployed to Testnet"
+            echo ""
+            echo "| Contract | Address |"
+            echo "| --- | --- |"
+            echo "| Savings Pool | \`${{ steps.deploy.outputs.savings_id }}\` |"
+            echo "| Treasury | \`${{ steps.deploy.outputs.treasury_id }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload deployment logs
+        if: always() && steps.guard.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-logs
+          path: scripts/deploy/logs
+          if-no-files-found: ignore
+
+  build-frontend:
+    name: Build frontend
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build against the deployed contracts
+        working-directory: frontend
+        env:
+          # Falls back to the committed .env.production values when the deploy
+          # job was skipped.
+          VITE_SAVINGS_CONTRACT_ID: ${{ needs.deploy.outputs.savings_id }}
+          VITE_TREASURY_CONTRACT_ID: ${{ needs.deploy.outputs.treasury_id }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload frontend bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          if-no-files-found: error
