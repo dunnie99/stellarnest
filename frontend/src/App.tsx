@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
+import RouteFallback from './components/RouteFallback';
 import WalletBar from './components/WalletBar';
-import Dashboard from './pages/Dashboard';
 import PoolDetails from './pages/PoolDetails';
 import Activity from './pages/Activity';
 import { useWallet } from './hooks/useWallet';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
 
 const NAV = [
   { to: '/', label: 'Dashboard', end: true },
@@ -57,7 +60,14 @@ export default function App() {
 
       <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
           <Route path="/pools/:poolId" element={<PoolDetails />} />
           <Route path="/activity" element={<Activity />} />
         </Routes>
