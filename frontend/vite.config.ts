@@ -8,6 +8,9 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
         codeSplitting: {
           groups: [
             {
