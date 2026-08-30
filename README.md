@@ -71,6 +71,20 @@ explains what to run — only on-chain actions are unavailable.
 - Node.js 20+
 - `cargo-llvm-cov` for contract coverage — `cargo install cargo-llvm-cov`
 
+### Frontend bundle strategy
+
+The frontend keeps the initial route lean by loading each page on demand. Production builds
+also isolate the React runtime, Stellar SDK, and wallet kit into stable, content-hashed vendor
+chunks; modules shared by multiple routes are emitted as a separate `shared-app` chunk. This
+keeps every generated JavaScript file below Vite's 500 kB warning threshold while preserving
+long-term browser caching for dependencies that change infrequently.
+
+Verify the generated chunk sizes locally with:
+
+```bash
+cd frontend && npm run build
+```
+
 ---
 
 ## Project structure
