@@ -2,7 +2,7 @@ import { IS_CONFIGURED, SAVINGS_CONTRACT_ID, TREASURY_CONTRACT_ID } from '../con
 import { truncateMiddle } from '../utils/format';
 
 /**
- * Explains what to run when contracts are not yet deployed.
+ * Explains how to configure contract IDs when they are unavailable at build time.
  *
  * The app is fully navigable without them — routing, layout and forms all work —
  * so this guides setup instead of letting reads fail with an opaque error.
@@ -32,15 +32,17 @@ export default function SetupBanner() {
     <div className="rounded-xl border border-amber-glow/40 bg-amber-glow/5 px-5 py-4">
       <p className="text-sm font-medium text-amber-glow">Contracts are not configured.</p>
       <p className="mt-1.5 text-xs leading-relaxed text-mist-300">
-        Deploy both contracts to the Testnet and the app will pick them up:
+        Add the deployed Testnet contract IDs to the build environment:
       </p>
       <pre className="mt-2.5 overflow-x-auto rounded-lg bg-ink-950 px-3 py-2 font-mono text-[11px] text-mist-300">
-        ./scripts/deploy/deploy.sh
+        VITE_SAVINGS_CONTRACT_ID / VITE_TREASURY_CONTRACT_ID
       </pre>
       <p className="mt-2 text-[11px] text-mist-400">
-        The script writes <code className="font-mono">VITE_SAVINGS_CONTRACT_ID</code> and{' '}
-        <code className="font-mono">VITE_TREASURY_CONTRACT_ID</code> into{' '}
-        <code className="font-mono">frontend/.env</code>. Restart the dev server afterwards.
+        For Vercel, add <code className="font-mono">VITE_SAVINGS_CONTRACT_ID</code> and{' '}
+        <code className="font-mono">VITE_TREASURY_CONTRACT_ID</code> under Project Settings → Environment{' '}
+        Variables, then redeploy. For local development,{' '}
+        <code className="font-mono">./scripts/deploy/deploy.sh</code> writes them to{' '}
+        <code className="font-mono">frontend/.env</code>; restart the dev server afterwards.
       </p>
     </div>
   );

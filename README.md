@@ -138,7 +138,7 @@ Three environment files, per the deployment target:
 |---|---|---|
 | `.env` | Local development; written by `deploy.sh` | No |
 | `.env.test` | Test runs — structurally valid dummy contract IDs, silent logging | Yes |
-| `.env.production` | Production builds; contract IDs supplied by the pipeline | Yes |
+| `.env.production` | Production builds, including Vercel; contains the public Testnet contract IDs | Yes |
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -152,6 +152,19 @@ Three environment files, per the deployment target:
 `.env.test` holds no secrets — its contract IDs are valid strkeys pointing at nothing, so
 tests exercise the configured code paths rather than the setup banner. Every test stubs the
 service layer, so no request is ever made.
+
+### Vercel
+
+Set the Vercel project root directory to `frontend`. The committed
+`frontend/.env.production` contains the public Testnet addresses, so Vercel uses the live
+contracts by default. If you deploy replacement contracts, configure these variables in
+**Project Settings → Environment Variables** for Production and redeploy; Vite embeds them
+in the build:
+
+```text
+VITE_SAVINGS_CONTRACT_ID=CCFOC4U7OAABRXJQXLVRZ7FL5UMQ5T6BXJ53WNCYJXKE7SVHS3I55R2R
+VITE_TREASURY_CONTRACT_ID=CDKVSTRN77GA344RTH6IE7HJZZFAZZFJI3KASTFCU3AENS2XMDOLDJP5
+```
 
 ---
 
