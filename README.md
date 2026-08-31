@@ -24,6 +24,23 @@ be audited independently of the bookkeeping.
 | CI/CD | PR checks plus a main-branch build → test → deploy → verify pipeline |
 
 ---
+## Project Live Links
+[Live Hosted Link](https://nestly-puce.vercel.app/)
+
+[Demo video link](https://www.loom.com/share/2d3ea9ab671049838b4369f24df96311)
+
+
+## Screenshots
+
+### Mobile Responsive UI
+![Screenshot: Mobile UI](mobileUI.png)
+
+### CI/CD Pipeline Running
+![Screenshot: CI/CD Pipeline ](pipeline.png)
+
+### Test Output Passing
+![Screenshot: Test Output Passing](passingTestOutput.png)
+
 
 ## Deployed contracts
 
@@ -42,8 +59,6 @@ joined, 125 XLM contributed, 40 XLM withdrawn, final state **85 XLM** reconcilin
 between both contracts. All four required events were emitted and decoded. The security
 properties were also confirmed live: a direct user call to the treasury is rejected, and a
 member cannot withdraw beyond their own balance.
-
-Full record, including every transaction hash, in [DEPLOYMENTS.md](../DEPLOYMENTS.md).
 
 ## Quick start
 
